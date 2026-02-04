@@ -285,9 +285,69 @@ async function startServer() {
     console.log("⚠️  Could not sync from Drive (Offline?), using local DB.");
   }
 
-  // 2. Start listening
+  // 2.
+  // PROFILE UPDATE
+  app.put('/api/auth/profile', authenticateToken, (req, res) => {
+    const { display_name, avatar_url } = req.body;
+    const userId = req.user.id;
+
+    const sql = `UPDATE users SET display_name = COALESCE(?, display_name), avatar_url = COALESCE(?, avatar_url) WHERE id = ?`;
+
+    db.run(sql, [display_name, avatar_url, userId], function (err) {
+      if (err) return res.status(500).json({ error: "Failed to update profile" });
+      res.json({ success: true, display_name, avatar_url });
+    });
+  });
+
+
+  // TASKS API
+  app.get('/api/tasks', authenticateToken, (req, res) => {
+    db.all("SELECT * FROM tasks WHERE user_id = ?", [req.user.id], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+
+  app.post('/api/tasks', authenticateToken, (req, res) => {
+    const { content, status } = req.body; // status: 'todo', 'inProgress', 'done'
+    db.run("INSERT INTO tasks (user_id, content, status) VALUES (?, ?, ?)", [req.user.id, content, status || 'todo'], function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: this.lastID, content, status: status || 'todo' });
+    });
+  });
+
+  app.put('/api/tasks/:id', authenticateToken, (req, res) => {
+    const { status } = req.body;
+    db.run("UPDATE tasks SET status = ? WHERE id = ? AND user_id = ?", [status, req.params.id, req.user.id], function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true });
+    });
+  });
+
+  app.delete('/api/tasks/:id', authenticateToken, (req, res) => {
+    db.run("DELETE FROM tasks WHERE id = ? AND user_id = ?", [req.params.id, req.user.id], function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true });
+    });
+  });
+
+  // Start Server
   app.listen(PORT, () => {
-    console.log(`✅ Server running at http://localhost:${PORT}`);
+    console.log(`Broklin Server running on port ${PORT}`);
+
+    // Ensure columns exist (Migration)
+    db.run("ALTER TABLE users ADD COLUMN display_name TEXT", (err) => { /* Ignore duplicate column error */ });
+    db.run("ALTER TABLE users ADD COLUMN avatar_url TEXT", (err) => { /* Ignore duplicate column error */ });
+
+    // Create Tasks Table
+    db.run(`CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      content TEXT,
+      status TEXT DEFAULT 'todo',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(user_id) REFERENCES users(id)
+    )`);
   });
 }
 
