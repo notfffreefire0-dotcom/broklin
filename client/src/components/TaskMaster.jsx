@@ -27,25 +27,41 @@ export default function TaskMaster() {
         fetchTasks();
     }, []);
 
+
     const addTask = async (status) => {
         const text = prompt("New Task:");
         if (!text) return;
 
+        // 1. Optimistic Update
+        const tempId = 'temp-' + Date.now();
+        const newTaskOptimistic = { id: tempId, content: text, status, isTemp: true };
+        setTasks(prev => [...prev, newTaskOptimistic]);
+
         const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
         const token = localStorage.getItem('token');
 
-        const res = await fetch(`${BASE_URL}/api/tasks`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ content: text, status })
-        });
+        try {
+            const res = await fetch(`${BASE_URL}/api/tasks`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ content: text, status })
+            });
 
-        if (res.ok) {
-            const newTask = await res.json();
-            setTasks(prev => [...prev, newTask]);
+            if (!res.ok) throw new Error("Failed to add task");
+
+            const savedTask = await res.json();
+
+            // 2. Replace Temp with Real
+            setTasks(prev => prev.map(t => t.id === tempId ? savedTask : t));
+
+        } catch (err) {
+            console.error(err);
+            alert("Failed to save task. Network error?");
+            // Rollback
+            setTasks(prev => prev.filter(t => t.id !== tempId));
         }
     };
 
@@ -102,13 +118,15 @@ export default function TaskMaster() {
                         layoutId={item.id}
                         key={item.id}
                         className="glass-panel"
+
                         initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        animate={{ opacity: item.isTemp ? 0.5 : 1, y: 0 }}
                         style={{
                             padding: '15px',
                             background: 'rgba(255,255,255,0.05)',
                             fontSize: '14px',
-                            position: 'relative'
+                            position: 'relative',
+                            border: item.isTemp ? '1px dashed rgba(255,255,255,0.2)' : 'none'
                         }}
                     >
                         {item.content}
