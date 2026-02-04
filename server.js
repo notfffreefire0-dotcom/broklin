@@ -82,8 +82,10 @@ app.post('/api/auth/login', (req, res) => {
   });
 });
 
+
 // GOOGLE AUTH
-const googleClient = new OAuth2Client('YOUR_GOOGLE_CLIENT_ID'); // Replace with actual ID in prod
+const CLIENT_ID = "27212760084-fr6c7hpq0ckt9mls3gcah8knbv0eosqd.apps.googleusercontent.com"; // User's actual ID
+const googleClient = new OAuth2Client(CLIENT_ID);
 
 app.post('/api/auth/google', async (req, res) => {
   const { token } = req.body;
@@ -92,7 +94,7 @@ app.post('/api/auth/google', async (req, res) => {
     // 1. Verify Google Token
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
-      audience: 'YOUR_GOOGLE_CLIENT_ID', // Replace with actual ID
+      audience: CLIENT_ID,
     });
     const { name, email, picture, sub: googleId } = ticket.getPayload();
 
