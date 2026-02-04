@@ -4,13 +4,16 @@ import { Sparkles, X } from 'lucide-react';
 
 export default function AddItemModal({ onClose, onSave }) {
     const [type, setType] = useState('career_note');
+
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [url, setUrl] = useState('');
+    const [dueDate, setDueDate] = useState('');
+    const [priority, setPriority] = useState('medium');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ type, title, content, url });
+        onSave({ type, title, content, url, dueDate, priority });
         onClose();
     };
 
@@ -58,13 +61,39 @@ export default function AddItemModal({ onClose, onSave }) {
                         </>
                     )}
 
+
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>DETAILS</label>
                     <textarea
                         placeholder="Add some context..."
                         value={content}
                         onChange={e => setContent(e.target.value)}
-                        style={{ height: '100px', resize: 'none' }}
+                        style={{ height: '80px', resize: 'none', marginBottom: '15px' }}
                     />
+
+                    <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', color: 'var(--text-secondary)' }}>DUE DATE</label>
+                            <input
+                                type="date"
+                                value={dueDate}
+                                onChange={e => setDueDate(e.target.value)}
+                                className="glass-input"
+                                style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-glass)', borderRadius: '8px', color: 'white' }}
+                            />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', color: 'var(--text-secondary)' }}>PRIORITY</label>
+                            <select
+                                value={priority}
+                                onChange={e => setPriority(e.target.value)}
+                                style={{ width: '100%', padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-glass)', borderRadius: '8px', color: 'white' }}
+                            >
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                         <button type="button" className="btn btn-glass" onClick={onClose} style={{ flex: 1 }}>Cancel</button>

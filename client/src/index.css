@@ -28,7 +28,33 @@
 
   --border-glass: 1px solid rgba(255, 255, 255, 0.08);
   --shadow-glass: 0 4px 30px rgba(0, 0, 0, 0.5);
+
   --blur-strength: 20px;
+}
+
+[data-theme='oceanic'] {
+  --bg-app: #0f172a;
+  --accent-violet: #38bdf8;
+  --accent-fuchsia: #0ea5e9;
+  --accent-cyan: #0284c7;
+  --gradient-main: linear-gradient(135deg, #38bdf8, #0ea5e9);
+}
+
+[data-theme='sunset'] {
+  --bg-app: #1c1917;
+  --accent-violet: #fb923c;
+  --accent-fuchsia: #f43f5e;
+  --accent-cyan: #e11d48;
+  --gradient-main: linear-gradient(135deg, #fb923c, #f43f5e);
+}
+
+[data-theme='midnight'] {
+  --bg-app: #000000;
+  --bg-glass: rgba(50, 50, 50, 0.8);
+  --accent-violet: #6366f1;
+  --accent-fuchsia: #8b5cf6;
+  --accent-cyan: #a855f7;
+  --gradient-main: linear-gradient(135deg, #6366f1, #8b5cf6);
 }
 
 * {
@@ -346,6 +372,40 @@ body {
   outline: none;
 }
 
+
 .modal-content input:focus {
   border-color: var(--accent-violet);
+}
+
+/* Scrollbar Hiding */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Fix for Kanban Buttons (In Prog / Done) */
+/* Assuming they are using .filter-pill or similar */
+.filter-pill {
+  padding: 8px 16px;
+  white-space: nowrap;
+  /* Prevent text wrapping */
+  min-width: 80px;
+  /* Minimum width for better touch target */
+  text-align: center;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
