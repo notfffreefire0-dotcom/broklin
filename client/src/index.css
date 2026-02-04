@@ -211,8 +211,30 @@ body {
   color: var(--text-primary);
 }
 
+
 .btn-glass:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* Small Action Buttons (Kanban) */
+.task-action-btn {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.task-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Grid */

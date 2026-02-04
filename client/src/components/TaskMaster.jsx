@@ -65,11 +65,12 @@ export default function TaskMaster() {
                     >
                         {item.content}
 
-                        {/* Simple controls to move items for MVP since DnD libs are heavy to setup in one go */}
-                        <div style={{ display: 'flex', gap: '5px', marginTop: '10px', opacity: 0.5 }}>
-                            {colId !== 'todo' && <button onClick={() => moveTask(item.id, colId, 'todo')} style={{ fontSize: '10px', padding: '2px 5px' }}>← Todo</button>}
-                            {colId !== 'inProgress' && <button onClick={() => moveTask(item.id, colId, 'inProgress')} style={{ fontSize: '10px', padding: '2px 5px' }}>In Prog</button>}
-                            {colId !== 'done' && <button onClick={() => moveTask(item.id, colId, 'done')} style={{ fontSize: '10px', padding: '2px 5px' }}>Done →</button>}
+
+                        {/* Simple controls to move items */}
+                        <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
+                            {colId !== 'todo' && <button className="task-action-btn" onClick={() => moveTask(item.id, colId, 'todo')}>← Todo</button>}
+                            {colId !== 'inProgress' && <button className="task-action-btn" onClick={() => moveTask(item.id, colId, 'inProgress')}>In Prog</button>}
+                            {colId !== 'done' && <button className="task-action-btn" onClick={() => moveTask(item.id, colId, 'done')}>Done →</button>}
                         </div>
                     </motion.div>
                 ))}
