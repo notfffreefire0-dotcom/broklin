@@ -12,6 +12,9 @@ import Settings from './components/Settings';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
+
+import LandingPage from './pages/LandingPage';
+
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -26,7 +29,7 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-function App() { // AppContent renamed to App, and now includes BrowserRouter and AuthProvider
+function AppContent() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
