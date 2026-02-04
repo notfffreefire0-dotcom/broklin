@@ -73,11 +73,12 @@ db.serialize(() => {
  * We debounce this (wait 5s) so we don't spam Google Drive if you save 10 items quickly.
  */
 let syncTimer;
+
 function triggerSync() {
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
-    uploadDatabase(DB_PATH);
-  }, 5000); // Wait 5 seconds after last edit to sync
+    uploadDatabase(DB_PATH).catch(err => console.error("Sync Failed:", err.message));
+  }, 1000); // Wait 1 second (was 5s)
 }
 
 module.exports = { db, triggerSync };

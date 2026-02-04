@@ -1,3 +1,4 @@
+
 // services/googleDrive.js
 const fs = require('fs');
 const path = require('path');
@@ -7,36 +8,54 @@ const { google } = require('googleapis');
 const TOKEN_PATH = path.join(__dirname, '../tokens.json');
 const CREDENTIALS_PATH = path.join(__dirname, '../client_secret.json');
 
-const DB_NAME = 'broklin.sqlite'; // The name of the file in Drive
-
+const DB_NAME = 'broklin.sqlite';
 
 let drive = null;
 
-try {
-  if (fs.existsSync(CREDENTIALS_PATH)) {
-    const keys = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
-    const key = keys.installed || keys.web;
+const initDrive = () => {
+  try {
+    let keys, tokens;
 
+    // 1. Load Credentials (Client ID/Secret)
+    if (process.env.GOOGLE_CREDENTIALS) {
+      keys = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    } else if (fs.existsSync(CREDENTIALS_PATH)) {
+      keys = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
+    }
+
+    if (!keys) {
+      console.log("⚠️ Google Drive: No Credentials found (GOOGLE_CREDENTIALS env or client_secret.json)");
+      return;
+    }
+
+    const key = keys.installed || keys.web;
     const auth = new google.auth.OAuth2(
       key.client_id,
       key.client_secret,
-      'http://localhost:3000/oauth2callback'
+      process.env.REDIRECT_URI || 'http://localhost:3000/oauth2callback'
     );
 
-    if (fs.existsSync(TOKEN_PATH)) {
-      const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
+    // 2. Load Tokens (Access/Refresh)
+    if (process.env.GOOGLE_TOKENS) {
+      tokens = JSON.parse(process.env.GOOGLE_TOKENS);
+    } else if (fs.existsSync(TOKEN_PATH)) {
+      tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
+    }
+
+    if (tokens) {
       auth.setCredentials(tokens);
       drive = google.drive({ version: 'v3', auth });
-      console.log("✅ Google Drive Sync: Ready");
+      console.log("✅ Google Drive Sync: Ready (Logged in)");
     } else {
-      console.log("⚠️ Google Drive Sync: Tokens missing (Skipping)");
+      console.log("⚠️ Google Drive: Not logged in (No Tokens)");
     }
-  } else {
-    console.log("⚠️ Google Drive Sync: Credentials missing (Skipping)");
+
+  } catch (err) {
+    console.error("⚠️ Drive Init Error:", err.message);
   }
-} catch (err) {
-  console.error("⚠️ Drive Init Error:", err.message);
-}
+};
+
+initDrive();
 
 /**
  * 1. Find the Database ID in Drive
