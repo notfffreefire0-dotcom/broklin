@@ -296,6 +296,7 @@ async function startServer() {
     db.run(sql, [display_name, avatar_url, userId], function (err) {
       if (err) return res.status(500).json({ error: "Failed to update profile" });
       res.json({ success: true, display_name, avatar_url });
+      triggerSync().catch(console.error);
     });
   });
 
@@ -313,6 +314,7 @@ async function startServer() {
     db.run("INSERT INTO tasks (user_id, content, status) VALUES (?, ?, ?)", [req.user.id, content, status || 'todo'], function (err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ id: this.lastID, content, status: status || 'todo' });
+      triggerSync().catch(console.error); // 🔥 Instant Sync
     });
   });
 
@@ -321,6 +323,7 @@ async function startServer() {
     db.run("UPDATE tasks SET status = ? WHERE id = ? AND user_id = ?", [status, req.params.id, req.user.id], function (err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ success: true });
+      triggerSync().catch(console.error); // 🔥 Instant Sync
     });
   });
 
@@ -328,6 +331,7 @@ async function startServer() {
     db.run("DELETE FROM tasks WHERE id = ? AND user_id = ?", [req.params.id, req.user.id], function (err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ success: true });
+      triggerSync().catch(console.error); // 🔥 Instant Sync
     });
   });
 
@@ -348,17 +352,18 @@ async function startServer() {
     db.get("SELECT * FROM habit_logs WHERE user_id = ? AND date = ?", [req.user.id, today], (err, row) => {
       if (err) return res.status(500).json({ error: err.message });
 
-      if (row) {
-        // Increment
+      if (row) {            // Increment
         db.run("UPDATE habit_logs SET count = count + 1 WHERE id = ?", [row.id], (err) => {
           if (err) return res.status(500).json({ error: err.message });
           res.json({ success: true, date: today, count: row.count + 1 });
+          triggerSync().catch(console.error); // 🔥 Instant Sync
         });
       } else {
         // Insert
         db.run("INSERT INTO habit_logs (user_id, date, count) VALUES (?, ?, 1)", [req.user.id, today], (err) => {
           if (err) return res.status(500).json({ error: err.message });
           res.json({ success: true, date: today, count: 1 });
+          triggerSync().catch(console.error); // 🔥 Instant Sync
         });
       }
     });
