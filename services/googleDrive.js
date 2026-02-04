@@ -9,32 +9,42 @@ const CREDENTIALS_PATH = path.join(__dirname, '../client_secret.json');
 
 const DB_NAME = 'broklin.sqlite'; // The name of the file in Drive
 
-// Load Credentials
-const keys = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
-const key = keys.installed || keys.web;
 
-// Setup Auth
-const auth = new google.auth.OAuth2(
-  key.client_id,
-  key.client_secret,
-  'http://localhost:3000/oauth2callback'
-);
+let drive = null;
 
-// Load Tokens
-if (fs.existsSync(TOKEN_PATH)) {
-  const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
-  auth.setCredentials(tokens);
-} else {
-  console.error("❌ No tokens found. Run auth_setup.js first.");
+try {
+  if (fs.existsSync(CREDENTIALS_PATH)) {
+    const keys = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
+    const key = keys.installed || keys.web;
+
+    const auth = new google.auth.OAuth2(
+      key.client_id,
+      key.client_secret,
+      'http://localhost:3000/oauth2callback'
+    );
+
+    if (fs.existsSync(TOKEN_PATH)) {
+      const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
+      auth.setCredentials(tokens);
+      drive = google.drive({ version: 'v3', auth });
+      console.log("✅ Google Drive Sync: Ready");
+    } else {
+      console.log("⚠️ Google Drive Sync: Tokens missing (Skipping)");
+    }
+  } else {
+    console.log("⚠️ Google Drive Sync: Credentials missing (Skipping)");
+  }
+} catch (err) {
+  console.error("⚠️ Drive Init Error:", err.message);
 }
-
-const drive = google.drive({ version: 'v3', auth });
 
 /**
  * 1. Find the Database ID in Drive
  * We search for the file by name to see if it exists.
  */
+
 async function getFileId() {
+  if (!drive) return null; // Added Guard
   try {
     const res = await drive.files.list({
       q: `name='${DB_NAME}' and trashed=false`,
