@@ -1,0 +1,20 @@
+
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Build Output
+client/dist/
+
+# Database
+*.sqlite
+*.db
+
+# Secrets & Credentials (NEVER PUSH THESE)
+tokens.json
+client_secret.json
+.env
+
+# System Files
+.DS_Store
+Thumbs.db

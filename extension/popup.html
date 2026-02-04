@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --bg-app: #0f172a;
+      --bg-card: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-primary: #3b82f6;
+      --accent-hover: #2563eb;
+      --radius: 12px;
+    }
+
+    body {
+      width: 320px;
+      padding: 20px;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-app);
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    h2 {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      background: var(--bg-card);
+      border: 1px solid #334155;
+      border-radius: var(--radius);
+      color: var(--text-main);
+      font-family: inherit;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent-primary);
+    }
+
+    textarea {
+      height: 80px;
+      resize: none;
+    }
+
+    button {
+      width: 100%;
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: var(--accent-hover);
+    }
+
+    button:disabled {
+      background: #334155;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 13px;
+      min-height: 20px;
+    }
+
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+
+    .secondary-btn {
+      background: transparent;
+      border: 1px solid #334155;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+    .secondary-btn:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+  <h2>⚡ Save to Brain</h2>
+  
+  <label>Category</label>
+  <select id="type">
+    <option value="bookmark">🔖 Bookmark</option>
+    <option value="movie">🎬 Movie</option>
+    <option value="game">🎮 Game</option>
+    <option value="career_note">💼 Career Note</option>
+  </select>
+
+  <label>Title</label>
+  <input type="text" id="title" placeholder="Page Title...">
+
+  <label>Notes</label>
+  <textarea id="content" placeholder="Add a quick thought..."></textarea>
+
+  <button id="saveBtn">Save to Brain</button>
+  <button id="viewBtn" class="secondary-btn">Open Dashboard</button>
+  
+  <div id="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
