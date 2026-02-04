@@ -18,7 +18,14 @@ const JWT_SECRET = 'your-secret-key-change-in-prod';
 
 // Middleware
 
-app.use(cors()); // Allow Chrome Extension to access
+
+// Allow requests from our specific Netlify Frontend
+const corsOptions = {
+  origin: ['https://broklinn.netlify.app', 'http://localhost:5173', 'http://localhost:3000'],
+  credentials: true, // Allow cookies/headers
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json()); // Allow JSON data
 
 // Serve React Frontend (Static Files)
