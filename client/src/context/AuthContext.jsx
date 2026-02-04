@@ -17,30 +17,42 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
+
     const login = async (username, password) => {
         const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const res = await fetch(`${BASE_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-        });
+        try {
+            const res = await fetch(`${BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
 
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || 'Login failed');
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") === -1) {
+                const text = await res.text();
+                console.error("Login Non-JSON response:", text);
+                throw new Error("Server returned HTML (Check API URL)");
+            }
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || 'Login failed');
+            }
+
+            const data = await res.json();
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify({ username: data.username }));
+            setUser({ username: data.username });
+            return data;
+        } catch (error) {
+            console.error("Login Error:", error);
+            throw error;
         }
-
-        const data = await res.json();
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify({ username: data.username }));
-        setUser({ username: data.username });
     };
-
-
 
     const register = async (username, password) => {
         const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        console.log("Registering at:", BASE_URL); // Debug log
+        console.log("Registering at:", BASE_URL);
 
         try {
             const res = await fetch(`${BASE_URL}/api/auth/register`, {
@@ -65,6 +77,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify({ username: data.username, avatar: data.avatar }));
             setUser({ username: data.username, avatar: data.avatar });
+            return true;
         } catch (error) {
             console.error("Register Error:", error);
             throw error;
@@ -73,20 +86,33 @@ export const AuthProvider = ({ children }) => {
 
     const loginWithGoogle = async (credential) => {
         const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const res = await fetch(`${BASE_URL}/api/auth/google`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: credential }),
-        });
+        try {
+            const res = await fetch(`${BASE_URL}/api/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: credential }),
+            });
 
-        if (!res.ok) {
-            throw new Error('Google Login Failed');
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") === -1) {
+                const text = await res.text();
+                console.error("Google Login Non-JSON response:", text);
+                throw new Error("Server returned HTML (Check API URL)");
+            }
+
+            if (!res.ok) {
+                throw new Error('Google Login Failed');
+            }
+
+            const data = await res.json();
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify({ username: data.username, avatar: data.avatar }));
+            setUser({ username: data.username, avatar: data.avatar });
+            return data;
+        } catch (error) {
+            console.error("Google Login Error:", error);
+            throw error;
         }
-
-        const data = await res.json();
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify({ username: data.username, avatar: data.avatar }));
-        setUser({ username: data.username, avatar: data.avatar });
     };
 
     const logout = () => {
