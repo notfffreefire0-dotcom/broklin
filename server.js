@@ -331,6 +331,39 @@ async function startServer() {
     });
   });
 
+
+  // HABIT MATRIX API
+  app.get('/api/habits/logs', authenticateToken, (req, res) => {
+    db.all("SELECT date, count FROM habit_logs WHERE user_id = ?", [req.user.id], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+
+  app.post('/api/habits/log', authenticateToken, (req, res) => {
+    const today = new Date().toISOString().split('T')[0];
+    const { count } = req.body; // allow manual setting or increment
+
+    // Check if exists
+    db.get("SELECT * FROM habit_logs WHERE user_id = ? AND date = ?", [req.user.id, today], (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      if (row) {
+        // Increment
+        db.run("UPDATE habit_logs SET count = count + 1 WHERE id = ?", [row.id], (err) => {
+          if (err) return res.status(500).json({ error: err.message });
+          res.json({ success: true, date: today, count: row.count + 1 });
+        });
+      } else {
+        // Insert
+        db.run("INSERT INTO habit_logs (user_id, date, count) VALUES (?, ?, 1)", [req.user.id, today], (err) => {
+          if (err) return res.status(500).json({ error: err.message });
+          res.json({ success: true, date: today, count: 1 });
+        });
+      }
+    });
+  });
+
   // Start Server
   app.listen(PORT, () => {
     console.log(`Broklin Server running on port ${PORT}`);
@@ -346,6 +379,15 @@ async function startServer() {
       content TEXT,
       status TEXT DEFAULT 'todo',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(user_id) REFERENCES users(id)
+    )`);
+
+    // Create Habit Logs Table
+    db.run(`CREATE TABLE IF NOT EXISTS habit_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      date TEXT,
+      count INTEGER DEFAULT 1,
       FOREIGN KEY(user_id) REFERENCES users(id)
     )`);
   });
